@@ -1,0 +1,24 @@
+INSERT INTO Admin (nama, tanggalLahir, alamat) VALUES
+(Fikri, 12/11/2000, Jalan jalan),
+(Rahma, 2/10/2000, Jalan Kemana),
+INSERT INTO Instruktur (nama, tanggalLahir, alamat, saldo) VALUES 
+(Umar, 08/08/2003, Jalan Kenangan, 1000000), 
+(Rayyan, 08/08/2003, Jalan Kenangan, 800000), 
+(Nunun, 08/08/2003, Jalan Kenangan, 200000),
+(Anyujin, 01/09/2003, Jalan Starship, 1000000),
+INSERT INTO Murid (nama, tanggalLahir, alamat, saldo) VALUES 
+(Sakura, 19/03/1998, Jalan Kagoshima, 1500000), 
+(Chaewon, 01/08/2000, Jalan Gangnam, 800000), 
+(Jennifer, 08/10/2001, Jalan Gangnam, 200000),
+(Kazuha, 09/08/2003, Jalan Osaka, 2500000),
+(Eunchae, 10/10/2006, Jalan Miryang, 200000),
+INSERT INTO Course (namaInstruktur, namaCourse) VALUES
+(Umar, Dasar Programming),
+(Nurun, Ilmu Melukis),
+(Rayyan, Desain Interaksi),
+(Anyujin, Public Speaking Skill),
+(Nunun, Ilmu Melukis Realis),
+INSERT INTO PaidCourse (namaInstruktur, namaCourse, harga) VALUES
+(Anyujin, Interpersonal Skill, 140000),
+(Nunun, Dasar Programming 3, 200000),
+(Anyujin, Self Development, 100000),
