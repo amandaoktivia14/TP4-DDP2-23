@@ -1,6 +1,7 @@
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.List;
@@ -75,7 +76,7 @@ public class Lemao {
                 buatCourse(scanner);
                 break;
             case 2: 
-                // lihatCourseSaya(scanner);
+                lihatCourseSaya(scanner);
                 break;
             case 3: 
                 buatRaporMurid(scanner);
@@ -124,10 +125,10 @@ public class Lemao {
                     lihatRapor(scanner);
                     break;
                 case 4:
-                    // bayarCourse(scanner);
+                    bayarCourse(scanner, null);
                     break;
                 case 5:
-                    // lihatSaldo(scanner);
+                    lihatSaldo();
                     break;
                 case 0:
                     logoutMenu();
@@ -141,34 +142,54 @@ public class Lemao {
         scanner.close();
     }
 
-    public void enrollCourse(Scanner scanner){
-        System.out.println("Berikut course yang ditawarkan pada Lemao:");
-        int i = 1;
-        for (Course course : courses){
-            System.out.println(i + ". Course: " + course.getName() + " - Instruktur: " + course.getInstrukturName());
-            i++;
+    public void enrollCourse(Scanner scanner) {
+        System.out.println("Available Courses:");
+        for (int i = 0; i < courses.size(); i++) {
+            System.out.println((i + 1) + ". " + courses.get(i).getName());
         }
-
-        System.out.print("Masukkan nomor course: ");
-        int courseIndex = scanner.nextInt();
-
-        if (courseIndex > 0 && courseIndex <= courses.size()){
-            Course selectedCourse = courses.get(courseIndex - 1);
-
-            if (!selectedCourse.isEnrolled(loginPengguna)) {
-                selectedCourse.enroll(loginPengguna);
-                System.out.println(selectedCourse.getName() + " berhasil di enroll");
-                selectedCourse.setActive(true);
-            } else {
-                System.out.println("Gagal Enroll: " + selectedCourse.getName() + " sedang di enroll");
-            }
-
+        System.out.print("Select a course to enroll: ");
+        int choice = scanner.nextInt();
+    
+        if (choice < 1 || choice > courses.size()) {
+            System.out.println("Invalid course selection.");
+            return;
         }
-        else {
-            System.out.println("Nomor course tidak valid");
+    
+        Course selectedCourse = courses.get(choice - 1);
+        Murid murid = (Murid) loginPengguna;
+    
+        if (selectedCourse instanceof PaidCourse) {
+            murid.getEnrolledCourses().add(selectedCourse);
+            System.out.println(selectedCourse.getName() + " added to your CourseCart.");
+        } else {
+            murid.getEnrolledCourses().add(selectedCourse);
+            System.out.println("Enrolled in " + selectedCourse.getName() + ".");
         }
     }
 
+    public void lihatCourseSaya(Scanner scanner){
+        int i = 1;
+        for (Course course : courses){
+            System.out.println("-------  " + i + "   -------");
+            System.out.println("Nama Course: " + course.getName());
+            System.out.println("Nama Instruktur: " + course.getInstrukturName());
+            System.out.println("Jumlah Murid: " + course.getJumlahMurid());
+            System.out.println("List Murid: ");
+
+            ArrayList<Murid> enrolledStudents = course.getEnrolledStudents();
+            if (! enrolledStudents.isEmpty()){
+                for (Murid murid : enrolledStudents){
+                    System.out.println("- " + murid.getName());
+                }
+            }
+            else{
+                System.out.println("Belum ada murid terdaftar.");
+            }
+
+            
+        }
+    }
+    
     public void lihatCourseAktif(Scanner scanner){
         System.out.println("-------- Course aktif saat ini --------");
         int i = 1;
@@ -182,25 +203,58 @@ public class Lemao {
             System.out.println("Tidak ada course aktif yang di-enroll.");
         }
     }
-
-    public void lihatRapor(Scanner scanner){
-        Murid loginMurid = (Murid) loginPengguna;
+    private void lihatPadaConsole(Murid murid) {
         System.out.println("---------- RAPOR ----------");
-        System.out.println("Total point anda: " + ((Murid) loginPengguna).getPoint());
-        System.out.println("Detail: ");
-
-        for (ReportCard reportCard : loginMurid.getReportCards()){
-            int i = 1;
-            System.out.println("---------- " + i +" ----------");
-            System.out.println("Nama murid: " + loginMurid.getName());
-            System.out.println("Nama course: " + reportCard.getCourse().getName());
+        System.out.println("Total Point Anda: " + murid.getPoint());
+        for (ReportCard reportCard : murid.getReportCards()) {
+            System.out.println("Nama Murid: " + murid.getName());
+            System.out.println("Nama Course: " + reportCard.getCourse().getName());
             System.out.println("Nilai: " + reportCard.getNilai());
             System.out.println("Feedback: " + reportCard.getFeedback());
-            i++;
         }
-
+    }
+    
+    private void cetakDalamTxt(Murid murid) throws NoReportException, FileNotFoundException {
+        if (murid.getReportCards().isEmpty()) {
+            throw new NoReportException("Tidak ada laporan untuk dicetak.");
+        }
+    
+        String filename = "Rapor-" + murid.getName() + ".txt";
+        try (PrintWriter out = new PrintWriter(filename)) {
+            out.println("---------- RAPOR ----------");
+            out.println("Total Point Anda: " + murid.getPoint());
+            for (ReportCard reportCard : murid.getReportCards()) {
+                out.println("Nama Murid: " + murid.getName());
+                out.println("Nama Course: " + reportCard.getCourse().getName());
+                out.println("Nilai: " + reportCard.getNilai());
+                out.println("Feedback: " + reportCard.getFeedback());
+            }
+        } catch (Exception e) {
+            throw new FileNotFoundException("File tidak ditemukan..");
+        }
     }
 
+    public void lihatRapor(Scanner scanner) {
+        Murid murid = (Murid) loginPengguna;
+        System.out.println("--------- Melihat Rapor ---------");
+        System.out.println("Format Rapor");
+        System.out.println("1. Lihat pada console");
+        System.out.println("2. Cetak dalam dokumen (.txt)");
+        System.out.print("Pilih jenis: ");
+        int choice = scanner.nextInt();
+
+        switch (choice) {
+            case 1:
+                lihatPadaConsole(murid);
+                break;
+            case 2:
+                cetakDalamTxt(murid);
+                break;
+            default:
+                System.out.println("Pilihan tidak valid.");
+                break;
+        }
+}
     public void buatCourse(Scanner scanner){
         System.out.println("--------- Membuat Course  ---------");
         System.out.println("Jenis Course");
@@ -342,7 +396,7 @@ public class Lemao {
                     String feedback = scanner.nextLine();
 
                     hitungPoint(selectedMurid, nilai, selectedCourse);
-                    // report.add(new ReportCard(selectedMurid, selectedCourse, nilai, feedback));
+                    report.add(new ReportCard(selectedMurid, selectedCourse, nilai, feedback));
                     selectedMurid.addReportCard(new ReportCard(selectedMurid, selectedCourse, nilai, feedback));
                     selectedCourse.removeEnrolledStudent(selectedMurid);
                     System.out.println("Report Card berhasil ditambahkan, point saat ini: " + selectedMurid.getPoint());
@@ -509,6 +563,7 @@ public class Lemao {
         }
         return null;
     }
+
     public void initData() {
         String fileName = "lemao-initiation.txt";
 
@@ -527,7 +582,6 @@ public class Lemao {
     }
 
     private void processInitiationData(String line) throws TeacherNotFoundException {
-        // Assuming the data format is: INSERT INTO ClassName (attribute1, attribute2, ...) VALUES (value1, value2, ...)
         String[] parts = line.split("\\(");
         String className = parts[0].substring(parts[0].indexOf("INTO") + 5).trim();
         String valuesPart = parts[1].substring(0, parts[1].length() - 1).trim();
@@ -568,53 +622,84 @@ public class Lemao {
             } else {
                 System.out.println("Gagal Enroll: " + selectedCourse.getName() + " sedang di enroll");
             }
-    
-            bayarCourse(scanner, selectedCourse, enrolledCourses);
+            bayarCourse(scanner, selectedCourse);
         } else {
             System.out.println("Nomor course tidak valid");
         }
     }
     
 
-public void bayarCourse(Scanner scanner, Course selectedCourse, List<Course> enrolledCourses) {
-    System.out.println("-------------- Payment ------------------");
-    System.out.println("Metode pembayaran : ");
-    System.out.println("1. Cash");
-    System.out.println("2. Credit Card");
-    System.out.print("Pilih metode pembayaran: ");
-    int metodePembayaran = scanner.nextInt();
-
-    try {
-        switch (metodePembayaran) {
-            case 1:
-                processCashPayment(selectedCourse, enrolledCourses);
-                break;
-            case 2:
-                processCreditCardPayment(scanner, selectedCourse, enrolledCourses);
-                break;
-            default:
-                System.out.println("Pilihan metode pembayaran tidak valid.");
-                break;
-        }
-    } catch (InsufficientBalanceException e) {
-        System.out.println(e.getMessage());
-    }
-}
-
-private void processCashPayment(Course selectedCourse, List<Course> enrolledCourses) throws InsufficientBalanceException {
+    public void bayarCourse(Scanner scanner, Course course) {
+        System.out.println("-------------- Payment ------------------");
+        System.out.println("Metode pembayaran:");
+        System.out.println("1. Cash");
+        System.out.println("2. Credit Card");
+        System.out.print("Pilih metode pembayaran: ");
+        int paymentMethod = scanner.nextInt();
     
-}
+        try {
+            if (paymentMethod == 1) {
+                processCashPayment(course);
+            } else if (paymentMethod == 2) {
+                System.out.print("Masukkan nomor credit card anda: ");
+                String creditCardNumber = scanner.next();
+                processCreditCardPayment(course, creditCardNumber);
+            } else {
+                System.out.println("Pilihan metode pembayaran tidak valid.");
+            }
+        } catch (InsufficientBalanceException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+    
 
-private void processCreditCardPayment(Scanner scanner, Course selectedCourse, List<Course> enrolledCourses) throws InsufficientBalanceException {
-    System.out.print("Masukkan nomor credit card anda: ");
-    String nomorCreditCard = scanner.next();
-  
-}
+    private void processCashPayment(Course course) throws InsufficientBalanceException {
+        Instruktur instruktur = (Instruktur) loginPengguna;
+        int coursePrice = course.getPrice();
+        if (instruktur.getBalance() < coursePrice) {
+            throw new InsufficientBalanceException("Saldo tidak mencukupi");
+        }
+        instruktur.setBalance(instruktur.getBalance() - coursePrice);
+        System.out.println("—----- Payment Berhasil —----");
+        System.out.println(course.getName() + " berhasil di enroll");
+    }
 
+    private void processCreditCardPayment(Course course, String creditCardNumber) throws InsufficientBalanceException {
+        Instruktur instruktur = (Instruktur) loginPengguna;
+        int coursePrice = course.getPrice();
+        if (instruktur.getBalance() < coursePrice) {
+            throw new InsufficientBalanceException("Saldo tidak mencukupi");
+        }
 
-    public void lihatSaldo(){
-        System.out.println("Saldo " + loginPengguna.getName() + " sebesar Rp" );
-                
+        if (!isValidCreditCardNumber(creditCardNumber)) {
+            throw new InsufficientBalanceException("Invalid credit card number");
+        }
+
+        instruktur.setBalance(instruktur.getBalance() - coursePrice);
+        System.out.println("—----- Payment Berhasil —----");
+        System.out.println(course.getName() + " berhasil di enroll menggunakan Credit Card - " + creditCardNumber);
+    }
+    private boolean isValidCreditCardNumber(String creditCardNumber) {
+        int nDigits = creditCardNumber.length();
+
+        int sum = 0;
+        boolean isSecond = false;
+        for (int i = nDigits - 1; i >= 0; i--) {
+            int digit = creditCardNumber.charAt(i) - '0';
+
+            if (isSecond == true)
+                digit = digit * 2;
+            sum += digit / 10;
+            sum += digit % 10;
+
+            isSecond = !isSecond;
+        }
+        return (sum % 10 == 0);
+    }
+
+    public void lihatSaldo() {
+        Murid murid = (Murid) loginPengguna;
+        System.out.println("Saldo " + murid.getName() + " sebesar Rp" + murid.getBalance() + ",-");
     }
 
 

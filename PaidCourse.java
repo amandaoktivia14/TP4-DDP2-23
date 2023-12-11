@@ -1,17 +1,16 @@
 public class PaidCourse extends Course {
-
-    private long price;
-
-    public PaidCourse(Instruktur instruktur, String courseName, long price) {
+    public PaidCourse(Instruktur instruktur, String courseName, int price) {
         super(instruktur, courseName);
-        this.price = price;
+        this.setPrice(price); 
     }
 
-    public long getPrice() {
-        return this.price;
+    @Override
+    public int getPrice() {
+        return super.getPrice();
     }
 
-    public void setPrice(long price) {
-        this.price = price;
+    @Override
+    public void setPrice(int price) {
+        super.setPrice(price); 
     }
 }

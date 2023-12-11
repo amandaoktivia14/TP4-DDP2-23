@@ -7,6 +7,8 @@ public class Course {
 
     private String courseName;
     private boolean isActive; 
+
+    private int price;
     
     
 
@@ -14,6 +16,7 @@ public class Course {
         this.instruktur = instruktur;
         this.courseName = courseName;
         this.isActive = false;
+        this.price = 0; 
         
     }
 
@@ -28,7 +31,6 @@ public class Course {
     }
 
     public boolean isEnrolled(Pengguna loginPengguna) {
-        // Implementasi
         for (Murid murid: enrolledStudents){
             if (murid.equals(loginPengguna)){
                 return true;
@@ -38,7 +40,6 @@ public class Course {
     }
 
     public void enroll(Pengguna loginPengguna) {
-        // Implementasi
         if (! isEnrolled(loginPengguna) && loginPengguna instanceof Murid){
             enrolledStudents.add((Murid) loginPengguna);
             this.isActive = true;
@@ -65,6 +66,20 @@ public class Course {
     public void setActive(boolean isActive) {
         this.isActive = isActive; 
     }
+
+    public int getPrice() {
+        return this.price;
+    }
+
+    public void setPrice(int price) {
+        this.price = price;
+    }
+
+    public int getJumlahMurid() {
+        return enrolledStudents.size();
+    }
+
+    
     
 }
 

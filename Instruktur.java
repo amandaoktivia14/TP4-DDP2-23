@@ -44,4 +44,8 @@ public class Instruktur extends Pengguna{
     public int getBalance() {
         return balance;
     }
+
+    public void setBalance(int balance) {
+        this.balance = balance;
+    }
 }
