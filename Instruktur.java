@@ -7,6 +7,8 @@ public class Instruktur extends Pengguna{
     private String instrukturDob;
     private String instrukturAddress;
     private int balance; 
+    // private String nomorID;
+    // private boolean isVerified;
 
     public Instruktur(String name, String dob, String address, boolean isApproved){
         super(name, dob, address);
@@ -16,8 +18,26 @@ public class Instruktur extends Pengguna{
         this.instrukturDob = dob;
         this.instrukturAddress = address;
         this.balance = 0;
+        // this.isVerified = false;
+        // this.nomorID = super.generateId("I");
 
     }
+    // public Instruktur(String nama, String tanggalLahir, String alamat, boolean isVerified) {
+    //     super(nama, tanggalLahir, alamat);
+    //     this.isVerified = isVerified;
+    // }
+
+    // public boolean isVerified() {
+    //     return this.isVerified;
+    // }
+
+    // public void setVerified(boolean isVerified) {
+    //     this.isVerified = isVerified;
+    // }
+
+    // public String getNomorID() {
+    //     return nomorID;
+    // }
 
     public String getName() {
         return instrukturName; 

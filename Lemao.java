@@ -1,6 +1,3 @@
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.security.PublicKey;
 import java.util.ArrayList;
@@ -248,7 +245,7 @@ public class Lemao {
                 lihatPadaConsole(murid);
                 break;
             case 2:
-                cetakDalamTxt(murid);
+                // cetakDalamTxt(murid);
                 break;
             default:
                 System.out.println("Pilihan tidak valid.");
@@ -564,37 +561,22 @@ public class Lemao {
         return null;
     }
 
-    public void initData() {
-        String fileName = "lemao-initiation.txt";
 
-        try (BufferedReader br = new BufferedReader(new FileReader(fileName))) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                try {
-                    processInitiationData(line);
-                } catch (TeacherNotFoundException e) {
-                    System.out.println(e.getMessage());
-                }
-            }
-        } catch (IOException e) {
-            System.out.println("Error reading file: " + e.getMessage());
-        }
-    }
+    public void initData(){
+        //SILAHKAN UNCOMMENT CODE DIBAWAH UNTUK INISIALISASI DATA
 
-    private void processInitiationData(String line) throws TeacherNotFoundException {
-        String[] parts = line.split("\\(");
-        String className = parts[0].substring(parts[0].indexOf("INTO") + 5).trim();
-        String valuesPart = parts[1].substring(0, parts[1].length() - 1).trim();
-        String[] values = valuesPart.split(",");
-    
-        switch (className) {
-            case "Course":
-                break;
-            case "Pengguna":
-                break;
-            default:
-                throw new TeacherNotFoundException("Unknown class name: " + className);
-        }
+        this.penggunas.add(new Admin("Fikri", "12/11/2001", "Jalan kebahagiaan"));
+
+        Instruktur instruktur1 = new Instruktur("Aristo", "13/11/86", "Jalan sesama", true);
+        Instruktur instruktur2 = new Instruktur("Mark", "03/01/90", "Jalan Bersama", false);
+
+        this.penggunas.add(instruktur1);
+        this.penggunas.add(instruktur2);
+        this.penggunas.add(new Murid("Drews", "12/09/03", "Sesame Street"));
+
+        this.courses.add(new Course(instruktur1, "Filsafat Modern"));
+        this.courses.add(new Course(instruktur1, "Ideologi Bangsa"));
+        
     }
     
 

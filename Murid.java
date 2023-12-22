@@ -6,13 +6,24 @@ public class Murid extends Pengguna {
     private ArrayList<ReportCard> reportCards = new ArrayList<>();
     private ArrayList<Course> enrolledCourses = new ArrayList<Course>();
     private int balance; 
+    // private String nomorID;
+    private int i;
 
 
     
     public Murid(String name, String dob, String address){
         super(name, dob, address);
         this.balance = 0;
+        this.i = i;
+        // this.point = 0;
+        // this.nomorID = super.generateId("M");
     }
+    // public String getNomorID() {
+    //     return nomorID;
+    // }
+    
+ 
+
     public String getTotalPoint() {
         return "Total Point Anda : " + point;
     }
