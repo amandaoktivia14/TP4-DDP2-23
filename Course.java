@@ -1,37 +1,33 @@
 import java.util.ArrayList;
-import java.util.jar.Attributes.Name;
 
 public class Course {
     private Instruktur instruktur;
-    private ArrayList<Murid> enrolledStudents = new ArrayList<Murid>();
+    private ArrayList<Murid> muridList = new ArrayList<Murid>();
 
-    private String courseName;
+    protected String namaCourse;
     private boolean isActive; 
-
-    private int price;
     
     
 
     public Course(Instruktur instruktur, String courseName) {
         this.instruktur = instruktur;
-        this.courseName = courseName;
+        this.namaCourse = courseName;
         this.isActive = false;
-        this.price = 0; 
         
     }
 
     public String getName() {
-        return courseName;
+        return namaCourse;
     }
 
    
 
     public String getInstrukturName() {
-        return instruktur.getName(); 
+        return instruktur.getNama(); 
     }
 
     public boolean isEnrolled(Pengguna loginPengguna) {
-        for (Murid murid: enrolledStudents){
+        for (Murid murid: muridList){
             if (murid.equals(loginPengguna)){
                 return true;
             }
@@ -41,45 +37,38 @@ public class Course {
 
     public void enroll(Pengguna loginPengguna) {
         if (! isEnrolled(loginPengguna) && loginPengguna instanceof Murid){
-            enrolledStudents.add((Murid) loginPengguna);
+            muridList.add((Murid) loginPengguna);
             this.isActive = true;
         }
         else{
-            System.out.println("Gagal enroll: " + loginPengguna.getName() + " sudah terdaftar di " + courseName);
+            System.out.println("Gagal enroll: " + loginPengguna.getNama() + " sudah terdaftar di " + namaCourse);
         }
 
+    }
+
+    public ArrayList<Murid> getMuridList() {
+        return this.muridList;
     }
 
     public boolean isActive() {
         return this.isActive;
     }
-    
-
-    public ArrayList<Murid> getEnrolledStudents() {
-        return enrolledStudents;
-    }
 
     public void removeEnrolledStudent(Murid murid) {
-        enrolledStudents.remove(murid);
+        muridList.remove(murid);
     }
 
     public void setActive(boolean isActive) {
         this.isActive = isActive; 
     }
 
-    public int getPrice() {
-        return this.price;
-    }
-
-    public void setPrice(int price) {
-        this.price = price;
-    }
-
     public int getJumlahMurid() {
-        return enrolledStudents.size();
+        return muridList.size();
     }
 
-    
+    public String getNamaCourse() {
+        return namaCourse;
+    }
     
 }
 

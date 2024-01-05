@@ -1,28 +1,67 @@
 import java.util.ArrayList;
-import java.util.Scanner;
 
 public class Pengguna {
-    //TODO: Lengkapi kelas
-    private String name;
-    private String dob;
-    private String address;
+    protected String nama;
+    protected String tanggalLahir;
+    protected String alamat;
+    protected long balance;
+    protected ArrayList<Payment> Payment = new ArrayList<>();
+    protected int point;
 
     public Pengguna(String nama, String tanggalLahir, String alamat){
-        this.name = nama;
-        this.dob = tanggalLahir;
-        this.address = alamat;
+        this.nama = nama;
+        this.tanggalLahir = tanggalLahir;
+        this.alamat = alamat;
     }
 
-    public String getName(){
-        return name;
+    public String getNama(){
+        return nama;
     }
 
-    public String getDob(){
-        return dob;
+    public String getTanggalLahir(){
+        return tanggalLahir;
     }
 
-    public String getAddress(){
-        return address;
+    public String getAlamat(){
+        return alamat;
+    }
+
+    public long getBalance() {
+        return balance;
+    }
+
+    public void setBalance(long saldo) {
+        this.balance = saldo;
+    }
+
+    public void setNama(String nama) {
+        this.nama = nama;
+    }
+    public void setTanggalLahir(String tanggalLahir) {
+        this.tanggalLahir = tanggalLahir;
+    }
+    public void setAlamat(String alamat) {
+        this.alamat = alamat;
+    }
+
+    public ArrayList<Payment> getPayment() {
+        return this.Payment;
+    }
+
+    public void setPayment(ArrayList<Payment> Payment) {
+        this.Payment = Payment;
+    }
+
+    public int getPoint() {
+        return this.point;
+    }
+
+    public void setPoint(int point) {
+        this.point = point;
+    }
+
+    public String toString() {
+        return String.format("Nama : %s \nTanggal Lahir : %s \nAlamat : %s", getNama(), getTanggalLahir(), getAlamat());
     }
     
     // public String generateId(String kodeJenis){

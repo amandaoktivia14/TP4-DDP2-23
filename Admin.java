@@ -6,6 +6,6 @@ public class Admin extends Pengguna {
 
     public String verifikasiInstruktur(Instruktur instruktur) {
         instruktur.approve();
-        return "Instruktur "+ instruktur.getName() + " berhasil diverifikasi";
+        return "Instruktur "+ instruktur.getNama() + " berhasil diverifikasi";
     }
 }

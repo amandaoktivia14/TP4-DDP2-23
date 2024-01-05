@@ -26,6 +26,16 @@ public class ReportCard {
     public String getFeedback() {
         return feedback;
     }
+
+    public int getScore() {
+        return nilai;
+    }
+
+    public String toString() {
+        return "";
+    }
+
+    public String details() {
+        return "Nama Murid: " + murid.getNama() + "\nNama Course: " + course.getNamaCourse() + "\nNilai: " + nilai + "\nFeedback : " + feedback + "\n";
+    }
 }
-
-

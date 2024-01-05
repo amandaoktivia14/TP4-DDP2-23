@@ -1,7 +1,5 @@
 import java.io.PrintWriter;
-import java.security.PublicKey;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Scanner;
 
 public class Lemao {
@@ -18,11 +16,10 @@ public class Lemao {
         app.logoutMenu(); }
 
     public void adminMenu(){
-        //TODO: Lengkapi menu instruktur
         Scanner scanner = new Scanner(System.in);
         int input;
         do{
-        System.out.println("---------------Admin " + loginPengguna.getName() + " Menu---------------");
+        System.out.println("---------------Admin " + loginPengguna.getNama() + " Menu---------------");
         System.out.println("1. Lihat Instruktur");
         System.out.println("2. Verifikasi Instruktur");
         System.out.println("3. Buat Training");
@@ -58,7 +55,7 @@ public class Lemao {
         Scanner scanner = new Scanner(System.in);
         int input;
         do{
-        System.out.println("---------------Instruktur " + loginPengguna.getName() + " Menu---------------");
+        System.out.println("---------------Instruktur " + loginPengguna.getNama() + " Menu---------------");
         System.out.println("1. Buat Course");
         System.out.println("2. Lihat Course Saya");
         System.out.println("3. Buat Rapor Murid");
@@ -98,10 +95,11 @@ public class Lemao {
     }
 
     public void muridMenu() {
+        Murid murid = (Murid) loginPengguna;
         Scanner scanner = new Scanner(System.in);
         int input ;
         do {
-            System.out.println("---------------Murid " + loginPengguna.getName() + " Menu---------------");
+            System.out.println("---------------Murid " + loginPengguna.getNama() + " Menu---------------");
             System.out.println("1. Enroll Course");
             System.out.println("2. Lihat Course Aktif Saya");
             System.out.println("3. Lihat Rapor");
@@ -110,7 +108,6 @@ public class Lemao {
             System.out.println("0. Logout");
             System.out.print("Pilih menu: ");
             input = scanner.nextInt();
-    
             switch (input) {
                 case 1:
                     enrollCourse(scanner);
@@ -156,10 +153,12 @@ public class Lemao {
         Murid murid = (Murid) loginPengguna;
     
         if (selectedCourse instanceof PaidCourse) {
-            murid.getEnrolledCourses().add(selectedCourse);
+            murid.addCourseToCart((PaidCourse) selectedCourse);
             System.out.println(selectedCourse.getName() + " added to your CourseCart.");
         } else {
             murid.getEnrolledCourses().add(selectedCourse);
+            selectedCourse.setActive(true);
+            selectedCourse.getMuridList().add(murid);
             System.out.println("Enrolled in " + selectedCourse.getName() + ".");
         }
     }
@@ -173,10 +172,10 @@ public class Lemao {
             System.out.println("Jumlah Murid: " + course.getJumlahMurid());
             System.out.println("List Murid: ");
 
-            ArrayList<Murid> enrolledStudents = course.getEnrolledStudents();
+            ArrayList<Murid> enrolledStudents = course.getMuridList();
             if (! enrolledStudents.isEmpty()){
                 for (Murid murid : enrolledStudents){
-                    System.out.println("- " + murid.getName());
+                    System.out.println("- " + murid.getNama());
                 }
             }
             else{
@@ -190,44 +189,37 @@ public class Lemao {
     public void lihatCourseAktif(Scanner scanner){
         System.out.println("-------- Course aktif saat ini --------");
         int i = 1;
-        for (Course course : courses){
-            if (course.isActive() && course.isEnrolled(loginPengguna)){
-                System.out.println(i + ". Nama course: " + course.getName() + " - Instruktur: " + course.getInstrukturName());
-                i++;
-            }
+        Murid murid = (Murid) loginPengguna;
+        for (Course course : murid.getEnrolledCourses()){
+            System.out.println(i + ". Nama course: " + course.getName() + " - Instruktur: " + course.getInstrukturName());
+            i++;
         }
         if (i == 1) {
             System.out.println("Tidak ada course aktif yang di-enroll.");
         }
     }
     private void lihatPadaConsole(Murid murid) {
-        System.out.println("---------- RAPOR ----------");
-        System.out.println("Total Point Anda: " + murid.getPoint());
-        for (ReportCard reportCard : murid.getReportCards()) {
-            System.out.println("Nama Murid: " + murid.getName());
-            System.out.println("Nama Course: " + reportCard.getCourse().getName());
-            System.out.println("Nilai: " + reportCard.getNilai());
-            System.out.println("Feedback: " + reportCard.getFeedback());
-        }
+        murid.printRaport();
     }
     
-    private void cetakDalamTxt(Murid murid) throws NoReportException, FileNotFoundException {
-        if (murid.getReportCards().isEmpty()) {
-            throw new NoReportException("Tidak ada laporan untuk dicetak.");
-        }
+    private void cetakDalamTxt(Murid murid) {
+        try {
+            if (murid.getReportCards().isEmpty()) {
+                throw new NoReportException("Tidak ada laporan untuk dicetak.");
+            }
     
-        String filename = "Rapor-" + murid.getName() + ".txt";
-        try (PrintWriter out = new PrintWriter(filename)) {
+            String filename = "Rapor-" + murid.getNama() + ".txt";
+            PrintWriter out = new PrintWriter(filename);
             out.println("---------- RAPOR ----------");
             out.println("Total Point Anda: " + murid.getPoint());
-            for (ReportCard reportCard : murid.getReportCards()) {
-                out.println("Nama Murid: " + murid.getName());
-                out.println("Nama Course: " + reportCard.getCourse().getName());
-                out.println("Nilai: " + reportCard.getNilai());
-                out.println("Feedback: " + reportCard.getFeedback());
+            for(int i = 0; i < murid.getReportCards().size(); i++){
+                out.println("----------  " + (i+1) + "  ----------");
+                out.println(murid.getReportCards().get(i).details());
             }
+            out.close();
+            System.out.println("\nRapor dapat dilihat pada "+ filename);
         } catch (Exception e) {
-            throw new FileNotFoundException("File tidak ditemukan..");
+            System.out.println(e.getMessage());
         }
     }
 
@@ -245,7 +237,7 @@ public class Lemao {
                 lihatPadaConsole(murid);
                 break;
             case 2:
-                // cetakDalamTxt(murid);
+                cetakDalamTxt(murid);
                 break;
             default:
                 System.out.println("Pilihan tidak valid.");
@@ -296,9 +288,9 @@ public class Lemao {
             if (pengguna instanceof Instruktur){
                 Instruktur instruktur = (Instruktur) pengguna;
                 System.out.println("-------  " + i + "   -------");
-                System.out.println("Nama: " + instruktur.getName());
-                System.out.println("Tanggal lahir: " + instruktur.getDob());
-                System.out.println("Alamat: " + instruktur.getAddress());
+                System.out.println("Nama: " + instruktur.getNama());
+                System.out.println("Tanggal lahir: " + instruktur.getTanggalLahir());
+                System.out.println("Alamat: " + instruktur.getAlamat());
                 String status = "Not Verified";
                 if (instruktur.isApproved()) status = "Verified";
                 System.out.print("Status: " + status);
@@ -319,7 +311,7 @@ public class Lemao {
         for (Pengguna pengguna : penggunas){
             if (pengguna instanceof Instruktur){
                 Instruktur instruktur = (Instruktur) pengguna;
-                if (instruktur.isApproved()) System.out.println("- " + instruktur.getName());
+                if (!instruktur.isApproved()) System.out.println("- " + instruktur.getNama());
             }
         }
         String cariInstruktur;
@@ -354,7 +346,7 @@ public class Lemao {
             }
         }while(hargaTraining <= 0);
 
-        Training training = new Training (namaTraining, hargaTraining);
+        Training training = new Training(namaTraining, hargaTraining);
         courses.add(training);
         System.out.println("Training berhasil ditambahkan");
     }
@@ -376,16 +368,16 @@ public class Lemao {
                 System.out.println("-----------------------------");
                 System.out.println("Berikut merupakan murid yang berada di kelas ini");
                 int j = 1;
-                for (Murid murid : selectedCourse.getEnrolledStudents()){
-                    System.out.println(j + ". " + murid.getName());
+                for (Murid murid : selectedCourse.getMuridList()){
+                    System.out.println(j + ". " + murid.getNama());
                     j++;
                 }
             
                 System.out.println("Masukkan nomor murid: ");
                 int nomorMurid = scanner.nextInt();
-                if (nomorMurid > 0 && nomorMurid <= selectedCourse.getEnrolledStudents().size()){
-                    Murid selectedMurid = selectedCourse.getEnrolledStudents().get(nomorMurid-1);
-                    System.out.println("Nilai untuk " + selectedMurid.getName() + " pada " + selectedCourse.getName() + ": ");
+                if (nomorMurid > 0 && nomorMurid <= selectedCourse.getMuridList().size()){
+                    Murid selectedMurid = selectedCourse.getMuridList().get(nomorMurid-1);
+                    System.out.println("Nilai untuk " + selectedMurid.getNama() + " pada " + selectedCourse.getName() + ": ");
                     int nilai = scanner.nextInt();
                     scanner.nextLine();
 
@@ -473,7 +465,7 @@ public class Lemao {
             System.out.println("Pendaftaran gagal, semua field harus diisi");
         } 
         else {
-            Murid murid = new Murid(name, dob, address);
+            Murid murid = new Murid(name, dob, address, 0);
             penggunas.add(murid);
             System.out.println("Pendaftaran berhasil, silahkan login kembali");
         }
@@ -554,7 +546,7 @@ public class Lemao {
     public Pengguna searchPengguna(String name){
         //TODO: Lengkapi method untuk mencari pengguna by Name
         for (Pengguna pengguna : penggunas){
-            if (pengguna.getName().equalsIgnoreCase(name)){
+            if (pengguna.getNama().equalsIgnoreCase(name)){
                 return pengguna;
             }
         }
@@ -565,27 +557,67 @@ public class Lemao {
     public void initData(){
         //SILAHKAN UNCOMMENT CODE DIBAWAH UNTUK INISIALISASI DATA
 
-        this.penggunas.add(new Admin("Fikri", "12/11/2001", "Jalan kebahagiaan"));
+        this.penggunas.add(new Admin("Fikri", "12/11/2000", "Jalan jalan"));
+        this.penggunas.add(new Admin("Rahma", "2/10/2000", "Jalan Kemana"));
 
-        Instruktur instruktur1 = new Instruktur("Aristo", "13/11/86", "Jalan sesama", true);
-        Instruktur instruktur2 = new Instruktur("Mark", "03/01/90", "Jalan Bersama", false);
+        Instruktur instruktur1 = new Instruktur("Aristo", "13/11/1986", "Jalan Sesama", 1000000);
+        Instruktur instruktur2 = new Instruktur("Mark", "03/01/1990", "Jalan Bersama", 800000);
+        Instruktur instruktur3 = new Instruktur("Ilma", "08/08/2003", "Jalan Kenangan", 200000);
+        Instruktur instruktur4 = new Instruktur("Heri", "01/09/2003", "Jalan Starship", 1000000);
 
         this.penggunas.add(instruktur1);
         this.penggunas.add(instruktur2);
-        this.penggunas.add(new Murid("Drews", "12/09/03", "Sesame Street"));
+        this.penggunas.add(instruktur3);
+        this.penggunas.add(instruktur4);
+        this.penggunas.add(new Murid("Amanda", "14/10/2004", "Jalan A", 1500000));
+        this.penggunas.add(new Murid("Yoshelin", "01/06/2004", "Jalan B", 800000));
+        this.penggunas.add(new Murid("Falinno", "20/12/2004", "Jalan C", 200000));
+        this.penggunas.add(new Murid("Syifa", "09/08/2004", "Jalan D", 2500000));
+        this.penggunas.add(new Murid("Chelsea", "10/10/2004", "Jalan E", 200000));
 
-        this.courses.add(new Course(instruktur1, "Filsafat Modern"));
-        this.courses.add(new Course(instruktur1, "Ideologi Bangsa"));
-        
+        String[] arrayInstruktur = {"Aristo", "Mark", "Rayyan", "Ilma", "Heri"};
+        String[] arrayCourse = {"Dasar Programming", "ALIN", "MPKT", "SOSI", "PBP"};
+        for (int i = 0; i < arrayInstruktur.length; i++) {
+            try {
+                Pengguna search = searchPengguna(arrayInstruktur[i]);
+                if (search == null || !(search instanceof Instruktur)) {
+                    throw new TeacherNotFoundException(arrayInstruktur[i]);
+                }
+                else {
+                    this.courses.add(new Course((Instruktur) search, arrayCourse[i]));
+                }
+            } catch (Exception e) {
+                System.err.println(e.getMessage());
+            }
+        }
+        String[] arrayPaidInstruktur = {"Aristo", "Mark", "Heri"};
+        String[] arrayPaidCourse = {"PBP", "Dasar Programming", "SOSI"};
+        long[] arrayHarga = {140000, 200000, 100000};
+        for (int i = 0; i < arrayPaidInstruktur.length; i++) {
+            try {
+                Pengguna search = searchPengguna(arrayPaidInstruktur[i]);
+                if (search == null || !(search instanceof Instruktur)) {
+                    throw new TeacherNotFoundException(arrayPaidInstruktur[i]);
+                }
+                else {
+                    this.courses.add(new PaidCourse((Instruktur) search, arrayPaidCourse[i], arrayHarga[i]));
+                }
+            } catch (Exception e) {
+                System.err.println(e.getMessage());
+            }
+        }
     }
     
 
     public void enrollTraining(Scanner scanner) {
+        ArrayList<Training> arrayListTraining = new ArrayList<>();
         System.out.println("Berikut daftar Training yang ditawarkan Lemao: ");
         int i = 1;
         for (Course course : courses) {
             if (course instanceof Training) {
-                System.out.println(i + ". " + course.getName());
+                Training training = (Training) course;
+                arrayListTraining.add(training);
+                System.out.println(i + ". " + training.details());
                 i++;
             }
         }
@@ -593,25 +625,29 @@ public class Lemao {
         System.out.print("Masukkan nomor course: ");
         int nomorCourse = scanner.nextInt();
     
-        if (nomorCourse > 0 && nomorCourse <= courses.size()) {
-            Course selectedCourse = courses.get(nomorCourse - 1);
+        if (nomorCourse > 0 && nomorCourse <= arrayListTraining.size()) {
+            Training selectedTraining = arrayListTraining.get(nomorCourse - 1);
     
-            if (!selectedCourse.isEnrolled(loginPengguna)) {
-                selectedCourse.enroll(loginPengguna);
-                enrolledCourses.add(selectedCourse);
-                System.out.println(selectedCourse.getName() + " berhasil di enroll");
-                selectedCourse.setActive(true);
-            } else {
-                System.out.println("Gagal Enroll: " + selectedCourse.getName() + " sedang di enroll");
+            if (loginPengguna instanceof Murid) {
+                if (!selectedTraining.isEnrolled(loginPengguna)) {
+                    selectedTraining.enroll(loginPengguna);
+                    enrolledCourses.add(selectedTraining);
+                    selectedTraining.setActive(true);
+                } else {
+                    System.out.println("Gagal Enroll: " + selectedTraining.getName() + " sedang di enroll");
+                }
             }
-            bayarCourse(scanner, selectedCourse);
+            else {
+                bayarCourse(scanner, selectedTraining);
+            }
+
         } else {
             System.out.println("Nomor course tidak valid");
         }
     }
     
 
-    public void bayarCourse(Scanner scanner, Course course) {
+    public void bayarCourse(Scanner scanner, PaidCourse course) {
         System.out.println("-------------- Payment ------------------");
         System.out.println("Metode pembayaran:");
         System.out.println("1. Cash");
@@ -621,7 +657,12 @@ public class Lemao {
     
         try {
             if (paymentMethod == 1) {
+                if (loginPengguna instanceof Murid) {
+                    Murid murid = (Murid) loginPengguna;
+                    loginPengguna.getPayment().add(new CashPayment(murid.getCourseCart(), loginPengguna));
+                }
                 processCashPayment(course);
+                
             } else if (paymentMethod == 2) {
                 System.out.print("Masukkan nomor credit card anda: ");
                 String creditCardNumber = scanner.next();
@@ -635,31 +676,34 @@ public class Lemao {
     }
     
 
-    private void processCashPayment(Course course) throws InsufficientBalanceException {
-        Instruktur instruktur = (Instruktur) loginPengguna;
-        int coursePrice = course.getPrice();
-        if (instruktur.getBalance() < coursePrice) {
+    private void processCashPayment(PaidCourse course) throws InsufficientBalanceException {
+        long coursePrice;
+        if (course != null) {
+            coursePrice = course.getPrice();
+        }
+        else coursePrice = ((Murid) loginPengguna).getCourseCart().getTotalHarga();
+        if (loginPengguna.getBalance() < coursePrice) {
             throw new InsufficientBalanceException("Saldo tidak mencukupi");
         }
-        instruktur.setBalance(instruktur.getBalance() - coursePrice);
-        System.out.println("—----- Payment Berhasil —----");
-        System.out.println(course.getName() + " berhasil di enroll");
+        ((CanPay) loginPengguna).pay();
+        if (loginPengguna instanceof Instruktur) System.out.println(course.getName() + " berhasil di enroll");
     }
 
-    private void processCreditCardPayment(Course course, String creditCardNumber) throws InsufficientBalanceException {
-        Instruktur instruktur = (Instruktur) loginPengguna;
-        int coursePrice = course.getPrice();
-        if (instruktur.getBalance() < coursePrice) {
+    private void processCreditCardPayment(PaidCourse course, String creditCardNumber) throws InsufficientBalanceException {
+        long coursePrice;
+        if (course != null) {
+            coursePrice = course.getPrice();
+        }
+        else coursePrice = ((Murid) loginPengguna).getCourseCart().getTotalHarga();
+        if (loginPengguna.getBalance() < coursePrice) {
             throw new InsufficientBalanceException("Saldo tidak mencukupi");
         }
 
         if (!isValidCreditCardNumber(creditCardNumber)) {
             throw new InsufficientBalanceException("Invalid credit card number");
         }
-
-        instruktur.setBalance(instruktur.getBalance() - coursePrice);
-        System.out.println("—----- Payment Berhasil —----");
-        System.out.println(course.getName() + " berhasil di enroll menggunakan Credit Card - " + creditCardNumber);
+        ((CanPay) loginPengguna).pay();
+        if (loginPengguna instanceof Instruktur) System.out.println(course.getName() + " berhasil di enroll");
     }
     private boolean isValidCreditCardNumber(String creditCardNumber) {
         int nDigits = creditCardNumber.length();
@@ -681,7 +725,7 @@ public class Lemao {
 
     public void lihatSaldo() {
         Murid murid = (Murid) loginPengguna;
-        System.out.println("Saldo " + murid.getName() + " sebesar Rp" + murid.getBalance() + ",-");
+        System.out.println("Saldo " + murid.getNama() + " sebesar Rp" + murid.getBalance() + ",-");
     }
 
 
